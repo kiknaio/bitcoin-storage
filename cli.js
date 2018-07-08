@@ -8,12 +8,6 @@ const path = require('path');
 const boxen = require('boxen');
 const wallets = require('./wallets');
 
-const generatePrivateKey = livenet => {
-  return new bitcore.PrivateKey(
-    livenet ? bitcore.Networks.livenet : bitcore.Networks.testnet
-  );
-}
-
 program
   .version('0.1.0')
   .option('-l, --livenet', 'For Livenet. Default is Testnet')
@@ -27,7 +21,7 @@ program
   .action(() => {
 
     // Generate private key
-    const key = generatePrivateKey(program.livenet);
+    const key = wallets.generatePrivateKey(program.livenet);
 
     // Display (-a) Address
     if (program.address) {
@@ -47,6 +41,26 @@ program
       if(err) throw new Error(err);
       console.log(`➜ Created new File ./keychain/${randomHash}.json for ${program.livenet ? 'Livenet' : 'Testnet'}`);
     });
+  });
+
+// Generate addres from private key file
+program
+  .command('address <file>')
+  .description('Generate address from private key file')
+  .action(file => {
+    // Read private key
+    wallets.generateAddress(file, program);
+  });
+
+program
+  .command('balance <address>')
+  .description('Check address balance')
+  .action(address => {
+    try {
+      wallets.checkAddressBalance(address, program);
+    } catch (e) { 
+      throw new Error(e);
+    }
   })
 
 program.parse(process.argv);

@@ -1,17 +1,30 @@
 const axios = require('axios');
 const { PrivateKey, Networks, PublicKey, Address, Transaction } = require('bitcore-lib');
+const fs = require('fs');
+const boxen = require('boxen');
+const qrcode = require('qrcode-terminal');
 const { savePrivateKey } = require('./db');
 
-exports.generateAddress = () => {
-  // ! Testnet
-  const privateKey = new PrivateKey(Networks.testnet);
-  const publicKey = new PublicKey(privateKey, Networks.testnet);
-  const address = new Address(publicKey, Networks.testnet);
-  console.log(publicKey);
-  const info = privateKey.toObject();
-  info.address = address.toString()
+exports.generatePrivateKey = livenet => {
+  return new PrivateKey(
+    livenet ? Networks.livenet : Networks.testnet
+  );
+}
 
-  // savePrivateKey(info, address.toString())
+exports.generateAddress = (file, { qrcode: wantsQrcode }) => {
+  fs.readFile(file, 'utf8', (err, key) => {
+    if (err) throw new Error(err);
+    const address = PrivateKey.fromObject(JSON.parse(key)).toAddress();
+    const network = address.toObject().network;
+    console.log(boxen(`Address: ${address.toString()} - ${network}`, {padding: 1}));
+    if (wantsQrcode) qrcode.generate(address.toString());
+  })
+}
+
+exports.checkAddressBalance = async (address, { livenet }) => {
+  console.log(`https://${livenet ? '' : 'testnet.'}blockexplorer.com/api/addr/${address}/balance`)
+  const balance = await axios.get(`https://${livenet ? '' : 'testnet.'}blockexplorer.com/api/addr/${address}/balance`);
+  console.log(boxen(`BTC ${balance.data / 100000000}`, { padding: 1 }));
 }
 
 exports.generateRawTx = async (receiver, privateKey, amount, changeAddress) => {
