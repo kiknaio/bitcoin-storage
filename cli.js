@@ -10,14 +10,14 @@ const wallets = require('./wallets');
 
 program
   .version('0.1.0')
-  .option('-l, --livenet', 'For Livenet. Default is Testnet')
-  .option('-q, --qrcode', 'Generate address QR code')
-  .option('-a, --address', 'Display address')
+  .option('-l, --livenet', 'for Livenet. Default is Testnet')
+  .option('-q, --qrcode', 'generate address QR code')
+  .option('-a, --address', 'display address')
 
 // Generate Private Key
 program
   .command('privatekey')
-  .description('Generate Bitcoin private key')
+  .description('generate Bitcoin private key')
   .action(() => {
 
     // Generate private key
@@ -46,7 +46,7 @@ program
 // Generate addres from private key file
 program
   .command('address <file>')
-  .description('Generate address from private key file')
+  .description('generate address from private key file')
   .action(file => {
     // Read private key
     wallets.generateAddress(file, program);
@@ -54,13 +54,20 @@ program
 
 program
   .command('balance <address>')
-  .description('Check address balance')
+  .description('check address balance')
   .action(address => {
     try {
       wallets.checkAddressBalance(address, program);
     } catch (e) { 
       throw new Error(e);
     }
+  })
+
+program
+  .command('save <privatekey> <content>')
+  .description('Save <content> to Bitcoin\'s Blockchain')
+  .action((privatekey, content) => {
+    wallets.broadcastTransaction(privatekey, content, program);
   })
 
 program.parse(process.argv);

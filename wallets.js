@@ -3,6 +3,7 @@ const { PrivateKey, Networks, PublicKey, Address, Transaction } = require('bitco
 const fs = require('fs');
 const boxen = require('boxen');
 const qrcode = require('qrcode-terminal');
+const Confirm = require('prompt-confirm');
 const { savePrivateKey } = require('./db');
 
 exports.generatePrivateKey = livenet => {
@@ -46,29 +47,81 @@ exports.generateRawTx = async (receiver, privateKey, amount, changeAddress) => {
   console.log(transaction);
 }
 
-exports.broadcastTransaction = rawtx => {
-  axios.post(`https://testnet.blockexplorer.com/api/tx/send`, { rawtx })
-    .then(res => console.log(res.data.txid))
-    .catch(error => console.error(error));
-}
+exports.broadcastTransaction = async (privatekey, content, { livenet }) => {
+  // Read the private key file
+  const key = PrivateKey.fromObject(JSON.parse(fs.readFileSync(privatekey, 'utf8')));
+  const network = key.network === 'testnet' ? Networks.testnet : Networks.livenet;
 
-exports.opReturn = async text => {
-  let utxo = await axios.get('https://testnet.blockexplorer.com/api/addr/mxTq9fUWhgYTyr7t7H3yrEYgaknxtcNxpW/utxo');
-  utxo = new Transaction.UnspentOutput(utxo.data[0]);
+  // Fetch UTXOs
+  let {data: [utxos]} = await axios.get(`https://${livenet ? '' : 'testnet.'}blockexplorer.com/api/addr/${key.toAddress().toString()}/utxo`);
+  utxos = new Transaction.UnspentOutput(utxos);
 
-  const key = PrivateKey.fromObject({
-    "address" : "mxTq9fUWhgYTyr7t7H3yrEYgaknxtcNxpW",
-    "bn" : "1c7ffbe9477d351771fdb6980317a444714464acd5cabeb1c850b67de9c34dda",
-    "compressed" : true,
-    "network" : "testnet"
-  });
-  var transaction = new Transaction()
-    .from(utxo)
-    .addData(text) // Add OP_RETURN data
-    .change('mxTq9fUWhgYTyr7t7H3yrEYgaknxtcNxpW')
-    .sign(key)
-    .toString();
+  // Fee for transaction
+  // let transactionFee;
+  // if (!livenet) {
+  //   transactionFee = await axios.get('https://bitcoinfees.earn.com/api/v1/fees/recommended')
+  //   transactionFee = transactionFee.data.hourFee;
+  // } else {
+  //   transactionFee = 500;
+  // }
+  // console.log(transactionFee);
   
-  await this.broadcastTransaction(transaction);
-  console.log('Transaction Broadcasted')
+  // Create RawTx
+  const rawtx = await new Transaction()
+    .from(utxos)
+    .addData(content)
+    .change(key.toAddress().toString())
+    .sign(key)
+    .toString()
+
+  
+  const prompt = new Confirm('Confirm the transaction?');
+  prompt.ask(answer => {
+    if(answer) {
+      // Broadcast transaction
+      axios.post(`https://testnet.blockexplorer.com/api/tx/send`, { rawtx })
+        .then(res => console.log(`https://www.blocktrail.com/tBTC/tx/${res.data.txid}`))
+        .catch(error => console.error(error.response.data));
+    }
+  });
+
+
+
+
+  // * Ask before sending the transaction
+  
+  
+  // Check the address and depend on address generate network variable
+
+
+  
+
+
+  // Generate RawTx
+
+//   // Broadcast transaction Hash
+//   axios.post(`https://testnet.blockexplorer.com/api/tx/send`, { rawtx })
+//     .then(res => console.log(res.data.txid))
+//     .catch(error => console.error(error));
+// }
+
+// exports.opReturn = async text => {
+//   let utxo = await axios.get('https://testnet.blockexplorer.com/api/addr/mxTq9fUWhgYTyr7t7H3yrEYgaknxtcNxpW/utxo');
+//   utxo = new Transaction.UnspentOutput(utxo.data[0]);
+
+//   const key = PrivateKey.fromObject({
+//     "address" : "mxTq9fUWhgYTyr7t7H3yrEYgaknxtcNxpW",
+//     "bn" : "1c7ffbe9477d351771fdb6980317a444714464acd5cabeb1c850b67de9c34dda",
+//     "compressed" : true,
+//     "network" : "testnet"
+//   });
+//   var transaction = new Transaction()
+//     .from(utxo)
+//     .addData(text) // Add OP_RETURN data
+//     .change('mxTq9fUWhgYTyr7t7H3yrEYgaknxtcNxpW')
+//     .sign(key)
+//     .toString();
+  
+//   await this.broadcastTransaction(transaction);
+//   console.log('Transaction Broadcasted')
 }
