@@ -12,6 +12,7 @@
   "dependencies": {
     "axios": "^0.18.0",
     "bitcore-lib": "^0.15.0",
+    "boxen": "^1.3.0",
     "commander": "^2.16.0",
     "firebase": "^5.2.0",
     "qrcode-terminal": "^0.12.0"
