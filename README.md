@@ -6,4 +6,4 @@ Opcode named `OP_RETURN` is the function which allows us to use this kind of fun
 
 [Watch demo](https://www.youtube.com/watch?v=OB7BQT5keQc&feature=youtu.be)
 
-[![bitcoin-storage youtube video](https://d3vv6lp55qjaqc.cloudfront.net/items/1j1F0N1T0I101h121t1q/Screen%20Shot%202018-08-18%20at%2000.16.22.png?X-CloudApp-Visitor-Id=2785463&v=c05f81cd)](https://www.youtube.com/watch?v=OB7BQT5keQc&feature=youtu.be)
+![bitcoin-storage structure](https://d3vv6lp55qjaqc.cloudfront.net/items/3L182A3h2H1p3h1G3T1a/bitcoin-storage%20banner.png?X-CloudApp-Visitor-Id=2785463&v=f4485db8)
