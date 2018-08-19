@@ -1,5 +1,11 @@
 const axios = require('axios');
-const { PrivateKey, Networks, PublicKey, Address, Transaction } = require('bitcore-lib');
+const {
+  PrivateKey,
+  Networks,
+  PublicKey,
+  Address,
+  Transaction
+} = require('bitcore-lib');
 const fs = require('fs');
 const boxen = require('boxen');
 const qrcode = require('qrcode-terminal');
