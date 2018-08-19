@@ -4,7 +4,6 @@ const fs = require('fs');
 const boxen = require('boxen');
 const qrcode = require('qrcode-terminal');
 const Confirm = require('prompt-confirm');
-const { savePrivateKey } = require('./db');
 
 exports.generatePrivateKey = livenet => {
   new PrivateKey(
