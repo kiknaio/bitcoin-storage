@@ -7,7 +7,7 @@ const Confirm = require('prompt-confirm');
 const { savePrivateKey } = require('./db');
 
 exports.generatePrivateKey = livenet => {
-  return new PrivateKey(
+  new PrivateKey(
     livenet ? Networks.livenet : Networks.testnet
   );
 }
@@ -56,16 +56,6 @@ exports.broadcastTransaction = async (privatekey, content, { livenet }) => {
   let {data: [utxos]} = await axios.get(`https://${livenet ? '' : 'testnet.'}blockexplorer.com/api/addr/${key.toAddress().toString()}/utxo`);
   utxos = new Transaction.UnspentOutput(utxos);
 
-  // Fee for transaction
-  // let transactionFee;
-  // if (!livenet) {
-  //   transactionFee = await axios.get('https://bitcoinfees.earn.com/api/v1/fees/recommended')
-  //   transactionFee = transactionFee.data.hourFee;
-  // } else {
-  //   transactionFee = 500;
-  // }
-  // console.log(transactionFee);
-  
   // Create RawTx
   const rawtx = await new Transaction()
     .from(utxos)
